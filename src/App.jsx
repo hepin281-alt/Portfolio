@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
-import Header from './components/Header';
+import React, { useEffect, useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
 import NavBar from './components/NavBar';
-import About from './components/About';
-import Skills from './components/Skills';
 import Projects from './components/Projects';
+import Home from './components/Home';
+import Contact from './components/Contact';
+import NotFound from './components/NotFound';
 import Footer from './components/Footer';
 import './App.css';
 
 function App() {
-  const [activeSection, setActiveSection] = useState('About');
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const mySkills = ['HTML5', 'CSS3', 'JavaScript (ES6+)', 'React', 'Node.js', 'Vite'];
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark-mode', isDarkMode);
+    return () => {
+      document.documentElement.classList.remove('dark-mode');
+    };
+  }, [isDarkMode]);
 
   return (
     <div className="app-container">
-      <NavBar activeSection={activeSection} setActiveSection={setActiveSection} />
-      <Header 
-        name="Hepinn Bhuva" 
-        title="Frontend Developer & UI/UX Enthusiast" 
-        themeColor="linear-gradient(135deg, #4A90E2, #8E44AD)" 
-      />
-      
+      <NavBar isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode((current) => !current)} />
       <main className="main-content">
-        {activeSection === 'About' && <About />}
-        {activeSection === 'Skills' && <Skills skillList={mySkills} />}
-        {activeSection === 'Projects' && <Projects />}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </main>
-      
+
       <Footer contactInfo="Get in touch: 24aiml004@charusat.edu.in" />
     </div>
   );
