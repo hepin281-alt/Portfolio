@@ -1,0 +1,188 @@
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const User = require('./models/User');
+const Task = require('./models/Task');
+const auth = require('./middleware/auth');
+const { validateRegister, validateLogin, validateTask } = require('./middleware/validate');
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+const JWT_SECRET = process.env.JWT_SECRET || 'charusat_itue301_jwt_secret_key_24aiml004';
+
+// ─── Global Middleware ─────────────────────────────────────────
+app.use(cors());
+app.use(express.json());
+
+// Request Logging Middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// ─── MongoDB Connection ───────────────────────────────────────
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/Taskmanager';
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// ─── Authentication Routes ────────────────────────────────────
+
+// POST /register — Register a new user
+app.post('/register', validateRegister, async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ error: 'User with this email already exists' });
+    }
+
+    // Hash password with bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ email, password: hashedPassword });
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      user: { id: user._id, email: user.email }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /login — Authenticate user and issue JWT
+app.post('/login', validateLogin, async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Verify user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Compare password using bcrypt
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Sign JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      user: { id: user._id, email: user.email }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /me — Retrieve currently logged-in user profile (Supplementary Problem)
+app.get('/me', auth, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── Protected Task CRUD Routes (Using auth and validation) ────
+
+// GET /tasks — Retrieve tasks for authenticated user
+app.get('/tasks', auth, async (req, res, next) => {
+  try {
+    const tasks = await Task.find({ user: req.user.id }).sort({ createdAt: -1 });
+    res.status(200).json(tasks);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /tasks — Create a task for authenticated user
+app.post('/tasks', auth, validateTask, async (req, res, next) => {
+  try {
+    const { title } = req.body;
+    const task = await Task.create({
+      title: title.trim(),
+      user: req.user.id
+    });
+    res.status(201).json(task);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /tasks/:id — Update task (ensure ownership)
+app.put('/tasks/:id', auth, validateTask, async (req, res, next) => {
+  try {
+    const { title, completed } = req.body;
+    const updateData = {};
+    if (title !== undefined) updateData.title = title.trim();
+    if (completed !== undefined) updateData.completed = completed;
+
+    const task = await Task.findOneAndUpdate(
+      { _id: req.params.id, user: req.user.id },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found or unauthorized' });
+    }
+    res.status(200).json(task);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /tasks/:id — Delete task (ensure ownership)
+app.delete('/tasks/:id', auth, async (req, res, next) => {
+  try {
+    const task = await Task.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.id
+    });
+
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found or unauthorized' });
+    }
+    res.status(200).json({ message: 'Task deleted successfully', task });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── 404 Handler for Undefined Routes ─────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ error: `Cannot ${req.method} ${req.url} - Route not found` });
+});
+
+// ─── Global Error Handling Middleware (Must be last) ───────────
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    error: err.message || 'Something went wrong on the server'
+  });
+});
+
+// ─── Start Server ─────────────────────────────────────────────
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

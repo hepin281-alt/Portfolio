@@ -1,0 +1,454 @@
+.task-manager-app {
+  --primary: #4a90e2;
+  --primary-dark: #357abd;
+  --danger: #e74c3c;
+  --danger-dark: #c0392b;
+  --success: #27ae60;
+  --bg: transparent;
+  --card: var(--surface-color, #ffffff);
+  --text: inherit;
+  --text-light: #95a5a6;
+  --border: #e1e8ed;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+  
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* ─── Header ─── */
+.task-manager-app .app-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.task-manager-app .app-header h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.task-manager-app .app-header p {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin-top: 0.4rem;
+}
+
+/* ─── Task Form ─── */
+.task-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.task-form input {
+  flex: 1;
+  padding: 0.9rem 1.2rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  color: inherit;
+  transition: border-color 0.2s;
+  background: var(--card);
+}
+
+.task-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* ─── Buttons ─── */
+.task-manager-app .btn {
+  padding: 0.7rem 1.4rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-manager-app .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.task-manager-app .btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.task-manager-app .btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.task-manager-app .btn-edit {
+  background: transparent;
+  color: var(--primary);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.task-manager-app .btn-edit:hover:not(:disabled) {
+  background: rgba(74, 144, 226, 0.1);
+}
+
+.task-manager-app .btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.task-manager-app .btn-danger:hover:not(:disabled) {
+  background: var(--danger-dark);
+}
+
+.task-manager-app .btn-cancel {
+  background: var(--border);
+  color: var(--text);
+}
+
+.task-manager-app .btn-cancel:hover {
+  background: #ccd1d9;
+}
+
+/* ─── Task List ─── */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: all 0.25s;
+  animation: slideIn 0.3s ease;
+}
+
+.task-item:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.task-item.loading {
+  opacity: 0.6;
+}
+
+.task-item.completed .task-title {
+  text-decoration: line-through;
+  color: var(--text-light);
+}
+
+.task-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.task-title {
+  flex: 1;
+  font-size: 1rem;
+  cursor: default;
+  color: inherit;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  background: var(--card);
+  color: inherit;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.task-actions .btn-danger {
+  background: transparent;
+  color: var(--danger);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.task-actions .btn-danger:hover:not(:disabled) {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+/* ─── Status Messages ─── */
+.status-msg {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.status-msg.error {
+  color: var(--danger);
+}
+
+.status-msg button {
+  margin-left: 0.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius);
+  color: white;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  animation: toastIn 0.4s ease;
+  z-index: 2000;
+}
+
+.toast-success { background: var(--success); }
+.toast-error { background: var(--danger); }
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.toast-close:hover { opacity: 1; }
+
+/* ─── Confirm Dialog ─── */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease;
+}
+
+.dialog-box {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.dialog-box p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: inherit;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.dialog-actions .btn {
+  padding: 0.7rem 1.8rem;
+}
+
+/* ─── Animations ─── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ─── User Profile Bar ─── */
+.user-profile-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card);
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.user-badge {
+  background: rgba(39, 174, 96, 0.15);
+  color: #27ae60;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-email {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.btn-logout {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--danger);
+  padding: 0.45rem 1rem !important;
+  font-size: 0.85rem !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(231, 76, 60, 0.2) !important;
+}
+
+.btn-logout:hover {
+  background: var(--danger) !important;
+  color: white !important;
+}
+
+/* ─── Auth Form Card ─── */
+.auth-card {
+  background: var(--card);
+  padding: 2.2rem 2rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  max-width: 440px;
+  margin: 0 auto 2rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.8rem;
+}
+
+.auth-header h2 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.auth-header p {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.auth-error-banner {
+  background: rgba(231, 76, 60, 0.12);
+  color: #c0392b;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 1.2rem;
+  border-left: 4px solid var(--danger);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.auth-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.auth-form .form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.auth-form input {
+  padding: 0.8rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--card);
+  color: inherit;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 0.85rem !important;
+  margin-top: 0.5rem;
+  font-size: 1rem !important;
+}
+
+.auth-toggle {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.toggle-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.toggle-link:hover {
+  color: var(--primary-dark);
+}

@@ -6,6 +6,7 @@ function NavBar({ isDarkMode, onToggleDarkMode }) {
     { to: '/', label: 'Home' },
     { to: '/projects', label: 'Projects' },
     { to: '/contact', label: 'Contact' },
+    { to: '/task-manager', label: 'Task Manager' },
   ];
 
   return (

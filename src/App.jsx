@@ -6,6 +6,7 @@ import Home from './components/Home';
 import Contact from './components/Contact';
 import NotFound from './components/NotFound';
 import Footer from './components/Footer';
+import TaskManager from './components/TaskManager';
 import './App.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/task-manager" element={<TaskManager />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
