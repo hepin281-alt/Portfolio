@@ -1,0 +1,52 @@
+version: '3.8'
+
+# Docker Compose Configuration (Practical 11)
+# Multi-container orchestration for React frontend, Express backend, and MongoDB
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: taskmanager-mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - taskmanager-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: taskmanager-backend
+    restart: always
+    ports:
+      - '5001:5001'
+    environment:
+      - PORT=5001
+      - MONGODB_URI=mongodb://mongodb:27017/Taskmanager
+      - JWT_SECRET=charusat_itue301_jwt_secret_key_24aiml004
+    depends_on:
+      - mongodb
+    networks:
+      - taskmanager-net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskmanager-frontend
+    restart: always
+    ports:
+      - '5173:80'
+    depends_on:
+      - backend
+    networks:
+      - taskmanager-net
+
+volumes:
+  mongo-data:
+
+networks:
+  taskmanager-net:
+    driver: bridge
