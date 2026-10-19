@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import Spinner from './Spinner';
 import ErrorMessage from './ErrorMessage';
 import RepoList from './RepoList';
+import DelayedFallback from './DelayedFallback';
+
+// Supplementary Problem 1: Lazy load heavy analytics component on demand
+const ProjectAnalytics = lazy(() => import('./ProjectAnalytics'));
 
 const GITHUB_REPOS_URL = 'https://api.github.com/users/hepin281-alt/repos?per_page=12&sort=updated';
 
@@ -11,6 +15,7 @@ function Projects() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [retryIndex, setRetryIndex] = useState(0);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -74,10 +79,37 @@ function Projects() {
             placeholder="Search repositories by name"
             aria-label="Search repositories by name"
           />
-
-          {/* AI/ML-only toggle removed per request */}
         </div>
       </div>
+
+      {/* Supplementary Problem 1: Lazy loaded heavy component toggle */}
+      <div style={{ margin: '1.2rem 0', display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          className="btn"
+          onClick={() => setShowAnalytics((prev) => !prev)}
+          style={{
+            background: showAnalytics ? '#e1e8ed' : 'linear-gradient(135deg, #4a90e2, #357abd)',
+            color: showAnalytics ? '#2c3e50' : '#ffffff',
+            padding: '0.6rem 1.2rem',
+            borderRadius: '10px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: '0 4px 12px rgba(74, 144, 226, 0.2)'
+          }}
+        >
+          {showAnalytics ? '✕ Hide Analytics' : '📊 View Analytics & Performance (Lazy Chunk)'}
+        </button>
+      </div>
+
+      {showAnalytics && (
+        <Suspense fallback={<DelayedFallback delay={100} message="Loading Analytics Module Chunk..." />}>
+          <ProjectAnalytics />
+        </Suspense>
+      )}
 
       {loading && <Spinner />}
       {error && <ErrorMessage message={error} onRetry={() => setRetryIndex((current) => current + 1)} />}

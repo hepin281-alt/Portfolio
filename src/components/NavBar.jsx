@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
+/**
+ * NavBar Component
+ * Wrapped with React.memo to prevent unnecessary re-renders
+ * during route changes and state updates in parent components.
+ */
 function NavBar({ isDarkMode, onToggleDarkMode }) {
   const navItems = [
     { to: '/', label: 'Home' },
@@ -38,4 +43,4 @@ function NavBar({ isDarkMode, onToggleDarkMode }) {
   );
 }
 
-export default NavBar;
+export default memo(NavBar);
